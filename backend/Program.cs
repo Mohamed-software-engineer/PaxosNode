@@ -14,6 +14,9 @@ builder.Services.AddSwaggerGen();
 var nodeIdEnv = Environment.GetEnvironmentVariable("NODE_ID");
 int nodeId = string.IsNullOrWhiteSpace(nodeIdEnv) ? 1 : int.Parse(nodeIdEnv);
 
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+
 var peersEnv = Environment.GetEnvironmentVariable("PEERS");
 var peerUrls = string.IsNullOrWhiteSpace(peersEnv)
     ? new List<string>()
@@ -76,6 +79,7 @@ builder.Services.AddCors(options =>
     });
 });
 
+
 var app = builder.Build();
 
 app.UseCors("AllowFrontend");
@@ -87,7 +91,7 @@ app.UseCors("AllowFrontend");
     app.UseSwagger();
     app.UseSwaggerUI();
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
