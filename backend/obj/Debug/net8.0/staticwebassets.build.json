@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "BpPDx7rFoaMy9qCRf5v2+jCAM3pbZGdfXta2jw4DYCk=",
+  "Source": "PaxosNode",
+  "BasePath": "_content/PaxosNode",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

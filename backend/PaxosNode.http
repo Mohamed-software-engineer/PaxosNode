@@ -1,0 +1,6 @@
+@PaxosNode_HostAddress = http://localhost:5164
+
+GET {{PaxosNode_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
