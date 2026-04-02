@@ -16,9 +16,7 @@ namespace Services
             PrepareRequest request,
             List<string> peerUrls)
         {
-            var responses = new List<PrepareResponse>();
-
-            foreach (var peer in peerUrls)
+            var tasks = peerUrls.Select(async peer =>
             {
                 try
                 {
@@ -30,28 +28,26 @@ namespace Services
                     if (response.IsSuccessStatusCode)
                     {
                         var body = await response.Content.ReadFromJsonAsync<PrepareResponse>();
-                        if (body != null)
-                        {
-                            responses.Add(body);
-                        }
+                        return body;
                     }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Prepare failed for {peer}: {ex.Message}");
                 }
-            }
 
-            return responses;
+                return (PrepareResponse?)null;
+            });
+
+            var results = await Task.WhenAll(tasks);
+            return results.Where(r => r != null).Select(r => r!).ToList();
         }
 
         public async Task<List<AcceptResponse>> SendAcceptAsync(
             AcceptRequest request,
             List<string> peerUrls)
         {
-            var responses = new List<AcceptResponse>();
-
-            foreach (var peer in peerUrls)
+            var tasks = peerUrls.Select(async peer =>
             {
                 try
                 {
@@ -63,26 +59,26 @@ namespace Services
                     if (response.IsSuccessStatusCode)
                     {
                         var body = await response.Content.ReadFromJsonAsync<AcceptResponse>();
-                        if (body != null)
-                        {
-                            responses.Add(body);
-                        }
+                        return body;
                     }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Accept failed for {peer}: {ex.Message}");
                 }
-            }
 
-            return responses;
+                return (AcceptResponse?)null;
+            });
+
+            var results = await Task.WhenAll(tasks);
+            return results.Where(r => r != null).Select(r => r!).ToList();
         }
 
         public async Task BroadcastLearnAsync(
             LearnRequest request,
             List<string> peerUrls)
         {
-            foreach (var peer in peerUrls)
+            var tasks = peerUrls.Select(async peer =>
             {
                 try
                 {
@@ -95,7 +91,9 @@ namespace Services
                 {
                     Console.WriteLine($"Learn failed for {peer}: {ex.Message}");
                 }
-            }
+            });
+
+            await Task.WhenAll(tasks);
         }
     }
 }

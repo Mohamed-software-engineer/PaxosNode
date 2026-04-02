@@ -13,17 +13,20 @@ namespace Controllers
         private readonly PaxosAcceptorService _acceptorService;
         private readonly PaxosLearnerService _learnerService;
         private readonly PaxosState _state;
+        private readonly int _nodeId;
 
         public PaxosController(
             PaxosCoordinatorService coordinatorService,
             PaxosAcceptorService acceptorService,
             PaxosLearnerService learnerService,
-            PaxosState state)
+            PaxosState state,
+            NodeConfiguration nodeConfiguration)
         {
             _coordinatorService = coordinatorService;
             _acceptorService = acceptorService;
             _learnerService = learnerService;
             _state = state;
+            _nodeId = nodeConfiguration.NodeId;
         }
 
         [HttpPost("propose")]
@@ -87,7 +90,7 @@ namespace Controllers
         {
             var response = new NodeStateResponse
             {
-                NodeId = 0, // هنغيرها بعدين لما نضيف NodeConfiguration
+                NodeId = _nodeId,
                 PromisedProposalNumber = _state.PromisedProposalNumber,
                 AcceptedProposalNumber = _state.AcceptedProposalNumber,
                 AcceptedValue = _state.AcceptedValue,

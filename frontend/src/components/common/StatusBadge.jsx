@@ -2,12 +2,13 @@ function StatusBadge({ healthy }) {
   return (
     <span
       style={{
-        padding: "6px 10px",
-        borderRadius: "12px",
+        display: "inline-block",
+        padding: "4px 12px",
+        borderRadius: "9999px",
         fontSize: "12px",
         fontWeight: "bold",
-        backgroundColor: healthy ? "#d1fae5" : "#fee2e2",
-        color: healthy ? "#065f46" : "#991b1b",
+        background: healthy ? "#dcfce7" : "#fee2e2",
+        color: healthy ? "#166534" : "#991b1b",
       }}
     >
       {healthy ? "Healthy" : "Unreachable"}

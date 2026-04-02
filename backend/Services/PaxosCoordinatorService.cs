@@ -8,6 +8,7 @@ namespace Services
         private readonly ProposalNumberService _proposalNumberService;
         private readonly PeerCommunicationService _peerCommunicationService;
         private readonly PaxosLearnerService _paxosLearnerService;
+        private readonly PaxosAcceptorService _acceptorService;
         private readonly PaxosState _state;
         private readonly int _nodeId;
         private readonly List<string> _peerUrls;
@@ -16,6 +17,7 @@ namespace Services
             ProposalNumberService proposalNumberService,
             PeerCommunicationService peerCommunicationService,
             PaxosLearnerService paxosLearnerService,
+            PaxosAcceptorService acceptorService,
             PaxosState state,
             int nodeId,
             List<string> peerUrls)
@@ -23,6 +25,7 @@ namespace Services
             _proposalNumberService = proposalNumberService;
             _peerCommunicationService = peerCommunicationService;
             _paxosLearnerService = paxosLearnerService;
+            _acceptorService = acceptorService;
             _state = state;
             _nodeId = nodeId;
             _peerUrls = peerUrls;
@@ -40,16 +43,20 @@ namespace Services
                 ProposerId = _nodeId
             };
 
-            var prepareResponses = await _peerCommunicationService.SendPrepareAsync(
+            var peerPrepareResponses = await _peerCommunicationService.SendPrepareAsync(
                 prepareRequest,
                 _peerUrls
             );
 
-            var promisedResponses = prepareResponses
+            var selfPrepareResponse = _acceptorService.HandlePrepare(prepareRequest);
+            peerPrepareResponses.Add(selfPrepareResponse);
+
+            var promisedResponses = peerPrepareResponses
                 .Where(r => r.Promised)
                 .ToList();
 
-            int majority = (_peerUrls.Count / 2) + 1;
+            int totalNodes = _peerUrls.Count + 1;
+            int majority = (totalNodes / 2) + 1;
 
             if (promisedResponses.Count < majority)
             {
@@ -77,12 +84,15 @@ namespace Services
                 ProposerId = _nodeId
             };
 
-            var acceptResponses = await _peerCommunicationService.SendAcceptAsync(
+            var peerAcceptResponses = await _peerCommunicationService.SendAcceptAsync(
                 acceptRequest,
                 _peerUrls
             );
 
-            var acceptedResponses = acceptResponses
+            var selfAcceptResponse = _acceptorService.HandleAccept(acceptRequest);
+            peerAcceptResponses.Add(selfAcceptResponse);
+
+            var acceptedResponses = peerAcceptResponses
                 .Where(r => r.Accepted)
                 .ToList();
 
@@ -92,12 +102,6 @@ namespace Services
             }
 
             Console.WriteLine($"[Node {_nodeId}] Value chosen = {chosenValue}");
-
-            lock (_state)
-            {
-                _state.IsChosen = true;
-                _state.LearnedValue = chosenValue;
-            }
 
             _paxosLearnerService.LearnValue(proposalNumber, chosenValue);
 

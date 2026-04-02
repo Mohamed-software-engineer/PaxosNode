@@ -11,7 +11,7 @@ function Navbar() {
     >
       <h1 style={{ margin: 0 }}>Paxos Distributed Dashboard</h1>
       <p style={{ margin: "6px 0 0", color: "#cbd5e1" }}>
-    For observing and controlling Paxos nodes
+        For observing and controlling Paxos nodes
       </p>
     </div>
   );

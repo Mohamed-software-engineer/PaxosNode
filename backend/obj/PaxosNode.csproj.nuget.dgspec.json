@@ -47,10 +47,6 @@
               "target": "Package",
               "version": "[8.0.25, )"
             },
-            "Microsoft.Data.Sqlite": {
-              "target": "Package",
-              "version": "[10.0.5, )"
-            },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[6.6.2, )"

@@ -32,7 +32,15 @@ builder.Services.AddSingleton<PaxosState>();
 //
 // Register HttpClient
 //
-builder.Services.AddHttpClient<PeerCommunicationService>();
+builder.Services.AddHttpClient<PeerCommunicationService>(client =>
+{
+    client.Timeout = TimeSpan.FromSeconds(5);
+})
+.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
+{
+    PooledConnectionLifetime = TimeSpan.FromMinutes(2),
+    MaxConnectionsPerServer = 10
+});
 
 //
 // Register services
@@ -56,26 +64,47 @@ builder.Services.AddSingleton<PaxosCoordinatorService>(sp =>
     var proposalNumberService = sp.GetRequiredService<ProposalNumberService>();
     var peerCommunicationService = sp.GetRequiredService<PeerCommunicationService>();
     var learnerService = sp.GetRequiredService<PaxosLearnerService>();
+    var acceptorService = sp.GetRequiredService<PaxosAcceptorService>();
     var state = sp.GetRequiredService<PaxosState>();
 
     return new PaxosCoordinatorService(
         proposalNumberService,
         peerCommunicationService,
         learnerService,
+        acceptorService,
         state,
         nodeId,
         peerUrls
     );
 });
 
+builder.Services.AddSingleton(sp =>
+{
+    return new NodeConfiguration { NodeId = nodeId };
+});
+
+var allowedOrigins = Environment.GetEnvironmentVariable("ALLOWED_ORIGINS")
+    ?.Split(',', StringSplitOptions.RemoveEmptyEntries)
+    .Select(o => o.Trim())
+    .ToArray()
+    ?? Array.Empty<string>();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy
-            .AllowAnyOrigin()
-            .AllowAnyHeader()
-            .AllowAnyMethod();
+        if (allowedOrigins.Length > 0)
+        {
+            policy.WithOrigins(allowedOrigins)
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        }
+        else
+        {
+            policy.AllowAnyOrigin()
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        }
     });
 });
 

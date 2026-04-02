@@ -168,24 +168,24 @@ function DashboardPage() {
         </div>
 
         <div style={{ display: "grid", gap: "16px" }}>
-  <ProposalForm
-    nodes={NODES}
-    selectedNodeId={selectedNodeId}
-    setSelectedNodeId={setSelectedNodeId}
-    value={proposalValue}
-    setValue={setProposalValue}
-    onSubmit={handleProposalSubmit}
-    loading={loadingProposal}
-  />
+          <ProposalForm
+            nodes={NODES}
+            selectedNodeId={selectedNodeId}
+            setSelectedNodeId={setSelectedNodeId}
+            value={proposalValue}
+            setValue={setProposalValue}
+            onSubmit={handleProposalSubmit}
+            loading={loadingProposal}
+          />
 
-  <ManualPaxosControl
-    nodes={NODES}
-    onActionComplete={refreshAll}
-    appendLog={appendLog}
-  />
+          <ManualPaxosControl
+            nodes={NODES}
+            onActionComplete={refreshAll}
+            appendLog={appendLog}
+          />
 
-  <ActivityLog logs={logs} />
-</div>
+          <ActivityLog logs={logs} />
+        </div>
       </div>
     </div>
   );

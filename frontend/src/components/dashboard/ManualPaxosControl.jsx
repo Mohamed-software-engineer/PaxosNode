@@ -18,6 +18,24 @@ function ManualPaxosControl({ nodes, onActionComplete, appendLog }) {
 
     if (!selectedNode) return;
 
+    const proposalNum = Number(proposalNumber);
+    const proposerIdNum = Number(proposerId);
+
+    if (isNaN(proposalNum) || proposalNum <= 0) {
+      appendLog("Invalid proposal number.");
+      return;
+    }
+
+    if (isNaN(proposerIdNum) || proposerIdNum <= 0) {
+      appendLog("Invalid proposer ID.");
+      return;
+    }
+
+    if ((operation === "accept" || operation === "learn") && !value.trim()) {
+      appendLog("Value is required for accept/learn operations.");
+      return;
+    }
+
     setLoading(true);
     setResponseData(null);
 
@@ -26,8 +44,8 @@ function ManualPaxosControl({ nodes, onActionComplete, appendLog }) {
 
       if (operation === "prepare") {
         const payload = {
-          proposalNumber: Number(proposalNumber),
-          proposerId: Number(proposerId),
+          proposalNumber: proposalNum,
+          proposerId: proposerIdNum,
         };
 
         result = await sendPrepare(selectedNode.baseUrl, payload);
@@ -38,26 +56,26 @@ function ManualPaxosControl({ nodes, onActionComplete, appendLog }) {
 
       if (operation === "accept") {
         const payload = {
-          proposalNumber: Number(proposalNumber),
-          proposerId: Number(proposerId),
-          value: value,
+          proposalNumber: proposalNum,
+          proposerId: proposerIdNum,
+          value: value.trim(),
         };
 
         result = await sendAccept(selectedNode.baseUrl, payload);
         appendLog(
-          `Accept sent to ${selectedNode.name} with proposal #${proposalNumber}, proposer ${proposerId}, value "${value}"`
+          `Accept sent to ${selectedNode.name} with proposal #${proposalNumber}, proposer ${proposerId}, value "${value.trim()}"`
         );
       }
 
       if (operation === "learn") {
         const payload = {
-          proposalNumber: Number(proposalNumber),
-          value: value,
+          proposalNumber: proposalNum,
+          value: value.trim(),
         };
 
         result = await sendLearn(selectedNode.baseUrl, payload);
         appendLog(
-          `Learn sent to ${selectedNode.name} with proposal #${proposalNumber}, value "${value}"`
+          `Learn sent to ${selectedNode.name} with proposal #${proposalNumber}, value "${value.trim()}"`
         );
       }
 

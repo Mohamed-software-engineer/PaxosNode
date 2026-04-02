@@ -9,14 +9,7 @@ function NodeCard({ node, state, onRefresh }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20, scale: 0.98 }}
-      animate={{
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        boxShadow: isChosen
-          ? "0 0 0 rgba(0,0,0,0)"
-          : "0 0 0 rgba(0,0,0,0)",
-      }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.4 }}
       style={{
         background: "white",
