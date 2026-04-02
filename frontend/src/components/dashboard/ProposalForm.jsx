@@ -1,7 +1,9 @@
+import { useMemo } from "react";
 import { motion } from "framer-motion";
 
 function ProposalForm({
   nodes,
+  nodeStates,
   selectedNodeId,
   setSelectedNodeId,
   value,
@@ -9,6 +11,11 @@ function ProposalForm({
   onSubmit,
   loading,
 }) {
+  const providerNode = useMemo(
+    () => nodes.find((n) => nodeStates[n.id]?.isProvider),
+    [nodes, nodeStates]
+  );
+
   const handleSubmit = (e) => {
     e.preventDefault();
     onSubmit();
@@ -38,7 +45,7 @@ function ProposalForm({
         >
           {nodes.map((node) => (
             <option key={node.id} value={node.id}>
-              {node.name}
+              {node.name}{nodeStates[node.id]?.isProvider ? " (Provider)" : ""}
             </option>
           ))}
         </select>

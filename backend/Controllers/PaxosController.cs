@@ -95,7 +95,8 @@ namespace Controllers
                 AcceptedProposalNumber = _state.AcceptedProposalNumber,
                 AcceptedValue = _state.AcceptedValue,
                 IsChosen = _state.IsChosen,
-                LearnedValue = _state.LearnedValue
+                LearnedValue = _state.LearnedValue,
+                IsProvider = _state.IsProvider
             };
 
             return Ok(response);

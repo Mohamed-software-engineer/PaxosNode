@@ -4,6 +4,7 @@ import { formatValue } from "../../utils/formatters";
 
 function NodeCard({ node, state, onRefresh }) {
   const isChosen = state?.isChosen;
+  const isProvider = state?.isProvider;
   const healthy = !!state?.healthy;
 
   return (
@@ -15,10 +16,16 @@ function NodeCard({ node, state, onRefresh }) {
         background: "white",
         borderRadius: "16px",
         padding: "20px",
-        boxShadow: isChosen
+        boxShadow: isProvider
+          ? "0 0 0 2px rgba(59,130,246,0.3), 0 6px 20px rgba(59,130,246,0.2)"
+          : isChosen
           ? "0 0 0 2px rgba(34,197,94,0.25), 0 6px 20px rgba(34,197,94,0.15)"
           : "0 2px 8px rgba(0,0,0,0.08)",
-        border: isChosen ? "1px solid #86efac" : "1px solid #e2e8f0",
+        border: isProvider
+          ? "1px solid #60a5fa"
+          : isChosen
+          ? "1px solid #86efac"
+          : "1px solid #e2e8f0",
       }}
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -27,15 +34,33 @@ function NodeCard({ node, state, onRefresh }) {
           <p style={{ fontSize: "12px", color: "#64748b" }}>{node.baseUrl}</p>
         </div>
 
-        <motion.div
-          animate={healthy ? { scale: [1, 1.05, 1] } : {}}
-          transition={{ repeat: Infinity, duration: 1.8 }}
-        >
-          <StatusBadge healthy={healthy} />
-        </motion.div>
+        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+          {isProvider && (
+            <span
+              style={{
+                display: "inline-block",
+                padding: "4px 12px",
+                borderRadius: "9999px",
+                fontSize: "12px",
+                fontWeight: "bold",
+                background: "#dbeafe",
+                color: "#1e40af",
+              }}
+            >
+              Provider
+            </span>
+          )}
+          <motion.div
+            animate={healthy ? { scale: [1, 1.05, 1] } : {}}
+            transition={{ repeat: Infinity, duration: 1.8 }}
+          >
+            <StatusBadge healthy={healthy} />
+          </motion.div>
+        </div>
       </div>
 
       <div style={{ marginTop: "16px", display: "grid", gap: "10px" }}>
+        <div><strong>Role:</strong> {isProvider ? "Provider" : "Acceptor"}</div>
         <div><strong>Node ID:</strong> {formatValue(state?.nodeId ?? node.id)}</div>
         <div><strong>Promised #:</strong> {formatValue(state?.promisedProposalNumber)}</div>
         <div><strong>Accepted #:</strong> {formatValue(state?.acceptedProposalNumber)}</div>

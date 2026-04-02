@@ -8,5 +8,6 @@ namespace State
 
         public bool IsChosen { get; set; } = false;
         public string? LearnedValue { get; set; }
+        public bool IsProvider { get; set; } = false;
     }
 }

@@ -91,6 +91,11 @@ function DashboardPage() {
     [nodeStates]
   );
 
+  const providerNode = useMemo(
+    () => Object.entries(nodeStates).find(([, x]) => x?.isProvider),
+    [nodeStates]
+  );
+
   const learnedValues = useMemo(() => {
     return [
       ...new Set(
@@ -115,9 +120,9 @@ function DashboardPage() {
         <SummaryCard title="Healthy Nodes" value={healthyCount} subtitle="From /health endpoint" />
         <SummaryCard title="Chosen Nodes" value={chosenCount} subtitle="Nodes with chosen state" />
         <SummaryCard
-          title="Cluster Values"
-          value={learnedValues.length ? learnedValues.join(", ") : "—"}
-          subtitle="Observed learned values"
+          title="Provider"
+          value={providerNode ? `Node ${providerNode[0]}` : "Waiting..."}
+          subtitle="First node to start (elected provider)"
         />
       </div>
 
@@ -170,6 +175,7 @@ function DashboardPage() {
         <div style={{ display: "grid", gap: "16px" }}>
           <ProposalForm
             nodes={NODES}
+            nodeStates={nodeStates}
             selectedNodeId={selectedNodeId}
             setSelectedNodeId={setSelectedNodeId}
             value={proposalValue}

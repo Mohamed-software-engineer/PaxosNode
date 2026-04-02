@@ -1,3 +1,4 @@
+using Models;
 using Services;
 using State;
 
@@ -125,5 +126,56 @@ app.UseCors("AllowFrontend");
 app.UseAuthorization();
 
 app.MapControllers();
+
+//
+// Provider election: first node to start becomes the provider
+//
+var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
+var peerComm = app.Services.GetRequiredService<PeerCommunicationService>();
+var state = app.Services.GetRequiredService<PaxosState>();
+
+lifetime.ApplicationStarted.Register(async () =>
+{
+    await Task.Delay(1000);
+
+    Console.WriteLine($"[Node {nodeId}] Checking if a provider already exists...");
+
+    bool providerExists = false;
+
+    foreach (var peer in peerUrls)
+    {
+        try
+        {
+            using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(2) };
+            var response = await client.GetAsync($"{peer}/api/paxos/state");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var peerState = await response.Content.ReadFromJsonAsync<NodeStateResponse>();
+                if (peerState != null && peerState.IsProvider)
+                {
+                    Console.WriteLine($"[Node {nodeId}] Provider found: Node {peerState.NodeId} at {peer}");
+                    providerExists = true;
+                    break;
+                }
+            }
+        }
+        catch
+        {
+            Console.WriteLine($"[Node {nodeId}] Peer {peer} not reachable yet.");
+        }
+    }
+
+    if (!providerExists)
+    {
+        state.IsProvider = true;
+        Console.WriteLine($"[Node {nodeId}] No provider found. This node is now the PROVIDER.");
+    }
+    else
+    {
+        state.IsProvider = false;
+        Console.WriteLine($"[Node {nodeId}] Provider already exists. This node is an acceptor.");
+    }
+});
 
 app.Run();

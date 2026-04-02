@@ -6,6 +6,9 @@ function ClusterVisualization({ nodes, nodeStates, selectedNodeId, pendingValue 
   const centerY = 180;
   const radius = 120;
 
+  const providerNode = nodes.find((n) => nodeStates[n.id]?.isProvider);
+  const providerNodeId = providerNode?.id;
+
   const points = nodes.map((node, index) => {
     const angle = (Math.PI * 2 * index) / nodes.length - Math.PI / 2;
     return {
@@ -30,6 +33,11 @@ function ClusterVisualization({ nodes, nodeStates, selectedNodeId, pendingValue 
       <h3>Paxos Cluster Visualization</h3>
       <p style={{ color: "#64748b", fontSize: "14px", marginBottom: "16px" }}>
         Selected proposer: Node {activeNodeId} | Pending value: {pendingValue || "—"}
+        {providerNodeId && (
+          <span style={{ marginLeft: "12px", color: "#2563eb", fontWeight: "bold" }}>
+            Provider: Node {providerNodeId}
+          </span>
+        )}
       </p>
 
       <svg viewBox="0 0 600 360" style={{ width: "100%", height: "360px" }}>
@@ -41,9 +49,9 @@ function ClusterVisualization({ nodes, nodeStates, selectedNodeId, pendingValue 
               y1={activePoint?.y}
               x2={point.x}
               y2={point.y}
-              stroke="#cbd5e1"
-              strokeWidth="2"
-              strokeDasharray="6 6"
+              stroke={point.id === providerNodeId ? "#3b82f6" : "#cbd5e1"}
+              strokeWidth={point.id === providerNodeId ? "3" : "2"}
+              strokeDasharray={point.id === providerNodeId ? "0" : "6 6"}
             />
           ) : null
         )}
@@ -53,7 +61,7 @@ function ClusterVisualization({ nodes, nodeStates, selectedNodeId, pendingValue 
             <motion.circle
               key={`pulse-${point.id}`}
               r="5"
-              fill="#2563eb"
+              fill={point.id === providerNodeId ? "#3b82f6" : "#2563eb"}
               initial={{ cx: activePoint?.x, cy: activePoint?.y, opacity: 0.3 }}
               animate={{
                 cx: [activePoint?.x, point.x],
@@ -72,20 +80,44 @@ function ClusterVisualization({ nodes, nodeStates, selectedNodeId, pendingValue 
         {points.map((point) => {
           const healthy = !!point.state?.healthy;
           const chosen = !!point.state?.isChosen;
+          const isProvider = point.id === providerNodeId;
           const isActive = point.id === activeNodeId;
 
           return (
             <g key={point.id}>
+              {isProvider && (
+                <motion.circle
+                  cx={point.x}
+                  cy={point.y}
+                  r="44"
+                  fill="none"
+                  stroke="#3b82f6"
+                  strokeWidth="2"
+                  animate={{ scale: [1, 1.08, 1], opacity: [0.6, 0.2, 0.6] }}
+                  transition={{ repeat: Infinity, duration: 2 }}
+                />
+              )}
+
               <motion.circle
                 cx={point.x}
                 cy={point.y}
                 r="36"
-                fill={isActive ? "#2563eb" : "white"}
-                stroke={chosen ? "#22c55e" : healthy ? "#94a3b8" : "#ef4444"}
-                strokeWidth="4"
+                fill={isActive ? "#2563eb" : isProvider ? "#dbeafe" : "white"}
+                stroke={
+                  isProvider
+                    ? "#3b82f6"
+                    : chosen
+                    ? "#22c55e"
+                    : healthy
+                    ? "#94a3b8"
+                    : "#ef4444"
+                }
+                strokeWidth={isProvider ? "4" : "4"}
                 animate={
                   isActive
                     ? { scale: [1, 1.06, 1] }
+                    : isProvider
+                    ? { scale: [1, 1.04, 1] }
                     : chosen
                     ? { scale: [1, 1.03, 1] }
                     : {}
@@ -99,7 +131,7 @@ function ClusterVisualization({ nodes, nodeStates, selectedNodeId, pendingValue 
                 textAnchor="middle"
                 fontSize="16"
                 fontWeight="bold"
-                fill={isActive ? "white" : "#0f172a"}
+                fill={isActive || isProvider ? "#1e3a8a" : "#0f172a"}
               >
                 N{point.id}
               </text>
@@ -109,9 +141,9 @@ function ClusterVisualization({ nodes, nodeStates, selectedNodeId, pendingValue 
                 y={point.y + 15}
                 textAnchor="middle"
                 fontSize="10"
-                fill={isActive ? "#dbeafe" : "#64748b"}
+                fill={isActive ? "#dbeafe" : isProvider ? "#2563eb" : "#64748b"}
               >
-                {healthy ? (chosen ? "chosen" : "ready") : "down"}
+                {isProvider ? "provider" : healthy ? chosen ? "chosen" : "ready" : "down"}
               </text>
             </g>
           );
