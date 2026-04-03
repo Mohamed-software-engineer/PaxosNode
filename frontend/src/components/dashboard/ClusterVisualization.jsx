@@ -1,4 +1,12 @@
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+
+const PHASE_COLORS = {
+  Prepare: { primary: "#3b82f6", bg: "#dbeafe", label: "blue" },
+  Accept: { primary: "#f59e0b", bg: "#fef3c7", label: "amber" },
+  Learn: { primary: "#22c55e", bg: "#dcfce7", label: "green" },
+  Complete: { primary: "#8b5cf6", bg: "#ede9fe", label: "purple" },
+  Failed: { primary: "#ef4444", bg: "#fee2e2", label: "red" },
+};
 
 function ClusterVisualization({ nodes, nodeStates, selectedNodeId, pendingValue }) {
   const activeNodeId = Number(selectedNodeId || 1);
@@ -8,6 +16,11 @@ function ClusterVisualization({ nodes, nodeStates, selectedNodeId, pendingValue 
 
   const providerNode = nodes.find((n) => nodeStates[n.id]?.isProvider);
   const providerNodeId = providerNode?.id;
+
+  const activePoint = nodes.find((n) => n.id === activeNodeId);
+  const activeState = nodeStates[activeNodeId];
+  const currentPhase = activeState?.currentPhase || "Idle";
+  const phaseColor = PHASE_COLORS[currentPhase];
 
   const points = nodes.map((node, index) => {
     const angle = (Math.PI * 2 * index) / nodes.length - Math.PI / 2;
@@ -19,7 +32,8 @@ function ClusterVisualization({ nodes, nodeStates, selectedNodeId, pendingValue 
     };
   });
 
-  const activePoint = points.find((p) => p.id === activeNodeId);
+  const activePos = points.find((p) => p.id === activeNodeId);
+  const isAnimating = ["Prepare", "Accept", "Learn"].includes(currentPhase);
 
   return (
     <div
@@ -40,13 +54,38 @@ function ClusterVisualization({ nodes, nodeStates, selectedNodeId, pendingValue 
         )}
       </p>
 
+      <AnimatePresence>
+        {isAnimating && phaseColor && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            style={{
+              background: phaseColor.bg,
+              color: phaseColor.primary,
+              borderRadius: "10px",
+              padding: "10px 16px",
+              marginBottom: "16px",
+              fontWeight: "bold",
+              fontSize: "15px",
+              textAlign: "center",
+              border: `2px solid ${phaseColor.primary}`,
+            }}
+          >
+            {currentPhase === "Prepare" && "Phase 1: Prepare — Proposer requesting promises"}
+            {currentPhase === "Accept" && "Phase 2: Accept — Proposer sending value for acceptance"}
+            {currentPhase === "Learn" && "Phase 3: Learn — Broadcasting chosen value to all nodes"}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <svg viewBox="0 0 600 360" style={{ width: "100%", height: "360px" }}>
         {points.map((point) =>
           point.id !== activeNodeId ? (
             <line
               key={`line-${point.id}`}
-              x1={activePoint?.x}
-              y1={activePoint?.y}
+              x1={activePos?.x}
+              y1={activePos?.y}
               x2={point.x}
               y2={point.y}
               stroke={point.id === providerNodeId ? "#3b82f6" : "#cbd5e1"}
@@ -56,26 +95,75 @@ function ClusterVisualization({ nodes, nodeStates, selectedNodeId, pendingValue 
           ) : null
         )}
 
-        {points.map((point) =>
-          point.id !== activeNodeId && point.state?.healthy ? (
-            <motion.circle
-              key={`pulse-${point.id}`}
-              r="5"
-              fill={point.id === providerNodeId ? "#3b82f6" : "#2563eb"}
-              initial={{ cx: activePoint?.x, cy: activePoint?.y, opacity: 0.3 }}
-              animate={{
-                cx: [activePoint?.x, point.x],
-                cy: [activePoint?.y, point.y],
-                opacity: [0.3, 1, 0.3],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                delay: point.id * 0.2,
-              }}
-            />
-          ) : null
-        )}
+        {isAnimating &&
+          activePos &&
+          points
+            .filter((p) => p.id !== activeNodeId && p.state?.healthy)
+            .map((point, idx) => (
+              <g key={`msg-${point.id}`}>
+                <motion.circle
+                  r="6"
+                  fill={phaseColor?.primary || "#3b82f6"}
+                  initial={{ cx: activePos.x, cy: activePos.y, opacity: 1 }}
+                  animate={{
+                    cx: [activePos.x, point.x],
+                    cy: [activePos.y, point.y],
+                    opacity: [1, 0.9, 0],
+                  }}
+                  transition={{
+                    duration: 1.2,
+                    repeat: Infinity,
+                    delay: idx * 0.15,
+                    ease: "easeInOut",
+                  }}
+                />
+
+                <motion.text
+                  fontSize="9"
+                  fontWeight="bold"
+                  fill={phaseColor?.primary || "#3b82f6"}
+                  initial={{ x: activePos.x + 10, y: activePos.y - 10, opacity: 1 }}
+                  animate={{
+                    x: [activePos.x + 10, (activePos.x + point.x) / 2 + 10],
+                    y: [activePos.y - 10, (activePos.y + point.y) / 2 - 10],
+                    opacity: [1, 0.8, 0],
+                  }}
+                  transition={{
+                    duration: 1.2,
+                    repeat: Infinity,
+                    delay: idx * 0.15,
+                    ease: "easeInOut",
+                  }}
+                >
+                  {currentPhase}
+                </motion.text>
+              </g>
+            ))}
+
+        {currentPhase === "Complete" &&
+          activePos &&
+          points
+            .filter((p) => p.id !== activeNodeId && p.state?.healthy)
+            .map((point, idx) => (
+              <g key={`done-${point.id}`}>
+                <motion.circle
+                  r="6"
+                  fill="#8b5cf6"
+                  initial={{ cx: point.x, cy: point.y, opacity: 0 }}
+                  animate={{
+                    cx: [point.x, activePos.x],
+                    cy: [point.y, activePos.y],
+                    opacity: [1, 0.8, 0],
+                  }}
+                  transition={{
+                    duration: 1,
+                    repeat: 2,
+                    delay: idx * 0.1,
+                    ease: "easeInOut",
+                  }}
+                />
+              </g>
+            ))}
 
         {points.map((point) => {
           const healthy = !!point.state?.healthy;
@@ -98,11 +186,24 @@ function ClusterVisualization({ nodes, nodeStates, selectedNodeId, pendingValue 
                 />
               )}
 
+              {isAnimating && isActive && (
+                <motion.circle
+                  cx={point.x}
+                  cy={point.y}
+                  r="48"
+                  fill="none"
+                  stroke={phaseColor?.primary || "#3b82f6"}
+                  strokeWidth="3"
+                  animate={{ scale: [1, 1.15, 1], opacity: [0.7, 0.1, 0.7] }}
+                  transition={{ repeat: Infinity, duration: 1.2 }}
+                />
+              )}
+
               <motion.circle
                 cx={point.x}
                 cy={point.y}
                 r="36"
-                fill={isActive ? "#2563eb" : isProvider ? "#dbeafe" : "white"}
+                fill={isActive ? (phaseColor?.primary || "#2563eb") : isProvider ? "#dbeafe" : "white"}
                 stroke={
                   isProvider
                     ? "#3b82f6"
@@ -112,7 +213,7 @@ function ClusterVisualization({ nodes, nodeStates, selectedNodeId, pendingValue 
                     ? "#94a3b8"
                     : "#ef4444"
                 }
-                strokeWidth={isProvider ? "4" : "4"}
+                strokeWidth="4"
                 animate={
                   isActive
                     ? { scale: [1, 1.06, 1] }

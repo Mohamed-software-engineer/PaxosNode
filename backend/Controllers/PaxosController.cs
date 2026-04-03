@@ -118,7 +118,8 @@ namespace Controllers
                 AcceptedValue = _state.AcceptedValue,
                 IsChosen = _state.IsChosen,
                 LearnedValue = _state.LearnedValue,
-                IsProvider = _state.IsProvider
+                IsProvider = _state.IsProvider,
+                CurrentPhase = _state.CurrentPhase
             };
 
             return Ok(response);

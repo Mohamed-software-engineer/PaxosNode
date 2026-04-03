@@ -37,6 +37,8 @@ namespace Services
 
             Console.WriteLine($"[Node {_nodeId}] Starting proposal n={proposalNumber}, value={originalValue}");
 
+            _state.CurrentPhase = "Prepare";
+
             var prepareRequest = new PrepareRequest
             {
                 ProposalNumber = proposalNumber,
@@ -60,6 +62,7 @@ namespace Services
 
             if (promisedResponses.Count < majority)
             {
+                _state.CurrentPhase = "Failed";
                 return $"Proposal failed: only {promisedResponses.Count} promises received, majority is {majority}";
             }
 
@@ -76,6 +79,8 @@ namespace Services
             }
 
             Console.WriteLine($"[Node {_nodeId}] Chosen value for accept phase = {chosenValue}");
+
+            _state.CurrentPhase = "Accept";
 
             var acceptRequest = new AcceptRequest
             {
@@ -98,10 +103,13 @@ namespace Services
 
             if (acceptedResponses.Count < majority)
             {
+                _state.CurrentPhase = "Failed";
                 return $"Accept phase failed: only {acceptedResponses.Count} accepts received, majority is {majority}";
             }
 
             Console.WriteLine($"[Node {_nodeId}] Value chosen = {chosenValue}");
+
+            _state.CurrentPhase = "Learn";
 
             _paxosLearnerService.LearnValue(proposalNumber, chosenValue);
 
@@ -115,6 +123,8 @@ namespace Services
                 learnRequest,
                 _peerUrls
             );
+
+            _state.CurrentPhase = "Complete";
 
             return $"Success: value '{chosenValue}' chosen with proposal number {proposalNumber}";
         }

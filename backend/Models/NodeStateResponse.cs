@@ -9,5 +9,6 @@ namespace Models
         public bool IsChosen { get; set; }
         public string? LearnedValue { get; set; }
         public bool IsProvider { get; set; }
+        public string CurrentPhase { get; set; } = "Idle";
     }
 }
