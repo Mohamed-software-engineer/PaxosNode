@@ -95,5 +95,29 @@ namespace Services
 
             await Task.WhenAll(tasks);
         }
+
+        public async Task BroadcastSetProviderAsync(
+            int providerNodeId,
+            List<string> peerUrls)
+        {
+            var payload = new { providerNodeId };
+
+            var tasks = peerUrls.Select(async peer =>
+            {
+                try
+                {
+                    await _httpClient.PostAsJsonAsync(
+                        $"{peer}/api/paxos/set-provider",
+                        payload
+                    );
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"SetProvider broadcast failed for {peer}: {ex.Message}");
+                }
+            });
+
+            await Task.WhenAll(tasks);
+        }
     }
 }

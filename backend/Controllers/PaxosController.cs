@@ -37,11 +37,33 @@ namespace Controllers
                 return BadRequest(new { message = "Value is required." });
             }
 
+            _state.IsProvider = true;
+
+            await _coordinatorService.BroadcastProviderAsync(_nodeId);
+
             var result = await _coordinatorService.StartProposalAsync(request.Value);
 
             return Ok(new
             {
                 message = result
+            });
+        }
+
+        [HttpPost("set-provider")]
+        public IActionResult SetProvider([FromBody] SetProviderRequest request)
+        {
+            if (request == null || request.ProviderNodeId <= 0)
+            {
+                return BadRequest(new { message = "Invalid request." });
+            }
+
+            _state.IsProvider = false;
+
+            Console.WriteLine($"[Node {_nodeId}] Node {request.ProviderNodeId} is now the provider.");
+
+            return Ok(new
+            {
+                message = $"Node {request.ProviderNodeId} is now the provider."
             });
         }
 
