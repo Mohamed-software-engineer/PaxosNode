@@ -10,5 +10,6 @@ namespace State
         public string? LearnedValue { get; set; }
         public bool IsProvider { get; set; } = false;
         public string CurrentPhase { get; set; } = "Idle";
+        public bool JoinedLate { get; set; } = false;
     }
 }

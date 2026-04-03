@@ -96,6 +96,17 @@ function DashboardPage() {
     [nodeStates]
   );
 
+  const roleCounts = useMemo(() => {
+    const counts = { provider: 0, learner: 0, acceptor: 0 };
+    Object.values(nodeStates).forEach((x) => {
+      if (!x?.healthy) return;
+      if (x?.isProvider) counts.provider++;
+      else if (x?.joinedLate) counts.learner++;
+      else counts.acceptor++;
+    });
+    return counts;
+  }, [nodeStates]);
+
   const learnedValues = useMemo(() => {
     return [
       ...new Set(
@@ -118,12 +129,9 @@ function DashboardPage() {
       >
         <SummaryCard title="Total Nodes" value={NODES.length} subtitle="Configured frontend nodes" />
         <SummaryCard title="Healthy Nodes" value={healthyCount} subtitle="From /health endpoint" />
-        <SummaryCard title="Chosen Nodes" value={chosenCount} subtitle="Nodes with chosen state" />
-        <SummaryCard
-          title="Provider"
-          value={providerNode ? `Node ${providerNode[0]}` : "Waiting..."}
-          subtitle="First node to start (elected provider)"
-        />
+        <SummaryCard title="Provider" value={roleCounts.provider} subtitle="Nodes acting as provider" />
+        <SummaryCard title="Learners" value={roleCounts.learner} subtitle="Nodes that learned consensus" />
+        <SummaryCard title="Acceptors" value={roleCounts.acceptor} subtitle="Nodes awaiting proposals" />
       </div>
 
       {/* Visualization Section */}

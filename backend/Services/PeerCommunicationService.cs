@@ -96,6 +96,32 @@ namespace Services
             await Task.WhenAll(tasks);
         }
 
+        public async Task<List<NodeStateResponse>> GetStatesAsync(List<string> peerUrls)
+        {
+            var tasks = peerUrls.Select(async peer =>
+            {
+                try
+                {
+                    var response = await _httpClient.GetAsync($"{peer}/api/paxos/state");
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var body = await response.Content.ReadFromJsonAsync<NodeStateResponse>();
+                        return body;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"GetState failed for {peer}: {ex.Message}");
+                }
+
+                return (NodeStateResponse?)null;
+            });
+
+            var results = await Task.WhenAll(tasks);
+            return results.Where(r => r != null).Select(r => r!).ToList();
+        }
+
         public async Task BroadcastSetProviderAsync(
             int providerNodeId,
             List<string> peerUrls)

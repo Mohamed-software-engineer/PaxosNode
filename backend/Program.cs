@@ -60,6 +60,14 @@ builder.Services.AddSingleton<PaxosAcceptorService>(sp =>
     return new PaxosAcceptorService(state, nodeId);
 });
 
+builder.Services.AddSingleton<PaxosCatchUpService>(sp =>
+{
+    var peerComm = sp.GetRequiredService<PeerCommunicationService>();
+    var learnerService = sp.GetRequiredService<PaxosLearnerService>();
+    var state = sp.GetRequiredService<PaxosState>();
+    return new PaxosCatchUpService(peerComm, learnerService, state, nodeId);
+});
+
 builder.Services.AddSingleton<PaxosCoordinatorService>(sp =>
 {
     var proposalNumberService = sp.GetRequiredService<ProposalNumberService>();
@@ -83,6 +91,8 @@ builder.Services.AddSingleton(sp =>
 {
     return new NodeConfiguration { NodeId = nodeId };
 });
+
+builder.Services.AddSingleton<List<string>>(peerUrls);
 
 var allowedOrigins = Environment.GetEnvironmentVariable("ALLOWED_ORIGINS")
     ?.Split(',', StringSplitOptions.RemoveEmptyEntries)
@@ -176,6 +186,9 @@ lifetime.ApplicationStarted.Register(async () =>
         state.IsProvider = false;
         Console.WriteLine($"[Node {nodeId}] Provider already exists. This node is an acceptor.");
     }
+
+    var catchUpService = app.Services.GetRequiredService<PaxosCatchUpService>();
+    await catchUpService.CatchUpAsync(peerUrls);
 });
 
 app.Run();

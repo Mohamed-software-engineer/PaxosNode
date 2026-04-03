@@ -5,7 +5,10 @@ import { formatValue } from "../../utils/formatters";
 function NodeCard({ node, state, onRefresh }) {
   const isChosen = state?.isChosen;
   const isProvider = state?.isProvider;
+  const joinedLate = state?.joinedLate;
   const healthy = !!state?.healthy;
+
+  const role = isProvider ? "Provider" : joinedLate ? "Learner" : isChosen ? "Acceptor" : "Acceptor";
 
   return (
     <motion.div
@@ -60,7 +63,7 @@ function NodeCard({ node, state, onRefresh }) {
       </div>
 
       <div style={{ marginTop: "16px", display: "grid", gap: "10px" }}>
-        <div><strong>Role:</strong> {isProvider ? "Provider" : "Acceptor"}</div>
+        <div><strong>Role:</strong> {role}</div>
         <div><strong>Node ID:</strong> {formatValue(state?.nodeId ?? node.id)}</div>
         <div><strong>Promised #:</strong> {formatValue(state?.promisedProposalNumber)}</div>
         <div><strong>Accepted #:</strong> {formatValue(state?.acceptedProposalNumber)}</div>

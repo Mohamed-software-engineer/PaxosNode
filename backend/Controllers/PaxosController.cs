@@ -12,21 +12,27 @@ namespace Controllers
         private readonly PaxosCoordinatorService _coordinatorService;
         private readonly PaxosAcceptorService _acceptorService;
         private readonly PaxosLearnerService _learnerService;
+        private readonly PaxosCatchUpService _catchUpService;
         private readonly PaxosState _state;
         private readonly int _nodeId;
+        private readonly List<string> _peerUrls;
 
         public PaxosController(
             PaxosCoordinatorService coordinatorService,
             PaxosAcceptorService acceptorService,
             PaxosLearnerService learnerService,
+            PaxosCatchUpService catchUpService,
             PaxosState state,
-            NodeConfiguration nodeConfiguration)
+            NodeConfiguration nodeConfiguration,
+            List<string> peerUrls)
         {
             _coordinatorService = coordinatorService;
             _acceptorService = acceptorService;
             _learnerService = learnerService;
+            _catchUpService = catchUpService;
             _state = state;
             _nodeId = nodeConfiguration.NodeId;
+            _peerUrls = peerUrls;
         }
 
         [HttpPost("propose")]
@@ -115,7 +121,8 @@ namespace Controllers
                 IsChosen = _state.IsChosen,
                 LearnedValue = _state.LearnedValue,
                 IsProvider = _state.IsProvider,
-                CurrentPhase = _state.CurrentPhase
+                CurrentPhase = _state.CurrentPhase,
+                JoinedLate = _state.JoinedLate
             };
 
             return Ok(response);
@@ -128,6 +135,25 @@ namespace Controllers
             {
                 status = "ok",
                 message = "Paxos node is running"
+            });
+        }
+
+        [HttpPost("catch-up")]
+        public async Task<IActionResult> CatchUp()
+        {
+            var success = await _catchUpService.CatchUpAsync(_peerUrls);
+
+            if (success)
+            {
+                return Ok(new
+                {
+                    message = $"Successfully caught up. Learned value: '{_state.LearnedValue}'."
+                });
+            }
+
+            return StatusCode(503, new
+            {
+                message = "Could not catch up. Not enough peers have a consensus value yet."
             });
         }
     }
