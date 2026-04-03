@@ -37,10 +37,6 @@ namespace Controllers
                 return BadRequest(new { message = "Value is required." });
             }
 
-            _state.IsProvider = true;
-
-            await _coordinatorService.BroadcastProviderAsync(_nodeId);
-
             var result = await _coordinatorService.StartProposalAsync(request.Value);
 
             return Ok(new
