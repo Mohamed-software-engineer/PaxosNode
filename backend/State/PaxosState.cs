@@ -8,7 +8,7 @@ namespace State
 
         public bool IsChosen { get; set; } = false;
         public string? LearnedValue { get; set; }
-        public bool IsProvider { get; set; } = false;
+        public bool IsProposer { get; set; } = false;
         public string CurrentPhase { get; set; } = "Idle";
         public bool JoinedLate { get; set; } = false;
     }

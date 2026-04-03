@@ -14,8 +14,8 @@ function ClusterVisualization({ nodes, nodeStates, selectedNodeId, pendingValue 
   const centerY = 180;
   const radius = 120;
 
-  const providerNode = nodes.find((n) => nodeStates[n.id]?.isProvider);
-  const providerNodeId = providerNode?.id;
+  const proposerNode = nodes.find((n) => nodeStates[n.id]?.isProposer);
+  const proposerNodeId = proposerNode?.id;
 
   const activePoint = nodes.find((n) => n.id === activeNodeId);
   const activeState = nodeStates[activeNodeId];
@@ -47,9 +47,9 @@ function ClusterVisualization({ nodes, nodeStates, selectedNodeId, pendingValue 
       <h3>Paxos Cluster Visualization</h3>
       <p style={{ color: "#64748b", fontSize: "14px", marginBottom: "16px" }}>
         Selected proposer: Node {activeNodeId} | Pending value: {pendingValue || "—"}
-        {providerNodeId && (
+        {proposerNodeId && (
           <span style={{ marginLeft: "12px", color: "#2563eb", fontWeight: "bold" }}>
-            Provider: Node {providerNodeId}
+            Proposer: Node {proposerNodeId}
           </span>
         )}
       </p>
@@ -88,9 +88,9 @@ function ClusterVisualization({ nodes, nodeStates, selectedNodeId, pendingValue 
               y1={activePos?.y}
               x2={point.x}
               y2={point.y}
-              stroke={point.id === providerNodeId ? "#3b82f6" : "#cbd5e1"}
-              strokeWidth={point.id === providerNodeId ? "3" : "2"}
-              strokeDasharray={point.id === providerNodeId ? "0" : "6 6"}
+              stroke={point.id === proposerNodeId ? "#3b82f6" : "#cbd5e1"}
+              strokeWidth={point.id === proposerNodeId ? "3" : "2"}
+              strokeDasharray={point.id === proposerNodeId ? "0" : "6 6"}
             />
           ) : null
         )}
@@ -168,12 +168,12 @@ function ClusterVisualization({ nodes, nodeStates, selectedNodeId, pendingValue 
         {points.map((point) => {
           const healthy = !!point.state?.healthy;
           const chosen = !!point.state?.isChosen;
-          const isProvider = point.id === providerNodeId;
+          const isProposer = point.id === proposerNodeId;
           const isActive = point.id === activeNodeId;
 
           return (
             <g key={point.id}>
-              {isProvider && (
+              {isProposer && (
                 <motion.circle
                   cx={point.x}
                   cy={point.y}
@@ -203,9 +203,9 @@ function ClusterVisualization({ nodes, nodeStates, selectedNodeId, pendingValue 
                 cx={point.x}
                 cy={point.y}
                 r="36"
-                fill={isActive ? (phaseColor?.primary || "#2563eb") : isProvider ? "#dbeafe" : "white"}
+                fill={isActive ? (phaseColor?.primary || "#2563eb") : isProposer ? "#dbeafe" : "white"}
                 stroke={
-                  isProvider
+                  isProposer
                     ? "#3b82f6"
                     : chosen
                     ? "#22c55e"
@@ -217,7 +217,7 @@ function ClusterVisualization({ nodes, nodeStates, selectedNodeId, pendingValue 
                 animate={
                   isActive
                     ? { scale: [1, 1.06, 1] }
-                    : isProvider
+                    : isProposer
                     ? { scale: [1, 1.04, 1] }
                     : chosen
                     ? { scale: [1, 1.03, 1] }
@@ -232,7 +232,7 @@ function ClusterVisualization({ nodes, nodeStates, selectedNodeId, pendingValue 
                 textAnchor="middle"
                 fontSize="16"
                 fontWeight="bold"
-                fill={isActive || isProvider ? "#1e3a8a" : "#0f172a"}
+                fill={isActive || isProposer ? "#1e3a8a" : "#0f172a"}
               >
                 N{point.id}
               </text>
@@ -242,9 +242,9 @@ function ClusterVisualization({ nodes, nodeStates, selectedNodeId, pendingValue 
                 y={point.y + 15}
                 textAnchor="middle"
                 fontSize="10"
-                fill={isActive ? "#dbeafe" : isProvider ? "#2563eb" : "#64748b"}
+                fill={isActive ? "#dbeafe" : isProposer ? "#2563eb" : "#64748b"}
               >
-                {isProvider ? "provider" : healthy ? chosen ? "chosen" : "ready" : "down"}
+                {isProposer ? "proposer" : healthy ? chosen ? "chosen" : "ready" : "down"}
               </text>
             </g>
           );

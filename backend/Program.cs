@@ -138,7 +138,7 @@ app.UseAuthorization();
 app.MapControllers();
 
 //
-// Provider election: first node to start becomes the provider
+// Proposer election: first node to start becomes the proposer
 //
 var lifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
 var peerComm = app.Services.GetRequiredService<PeerCommunicationService>();
@@ -148,9 +148,9 @@ lifetime.ApplicationStarted.Register(async () =>
 {
     await Task.Delay(1000);
 
-    Console.WriteLine($"[Node {nodeId}] Checking if a provider already exists...");
+    Console.WriteLine($"[Node {nodeId}] Checking if a proposer already exists...");
 
-    bool providerExists = false;
+    bool proposerExists = false;
 
     foreach (var peer in peerUrls)
     {
@@ -162,10 +162,10 @@ lifetime.ApplicationStarted.Register(async () =>
             if (response.IsSuccessStatusCode)
             {
                 var peerState = await response.Content.ReadFromJsonAsync<NodeStateResponse>();
-                if (peerState != null && peerState.IsProvider)
+                if (peerState != null && peerState.IsProposer)
                 {
-                    Console.WriteLine($"[Node {nodeId}] Provider found: Node {peerState.NodeId} at {peer}");
-                    providerExists = true;
+                    Console.WriteLine($"[Node {nodeId}] Proposer found: Node {peerState.NodeId} at {peer}");
+                    proposerExists = true;
                     break;
                 }
             }
@@ -176,15 +176,15 @@ lifetime.ApplicationStarted.Register(async () =>
         }
     }
 
-    if (!providerExists)
+    if (!proposerExists)
     {
-        state.IsProvider = true;
-        Console.WriteLine($"[Node {nodeId}] No provider found. This node is now the PROVIDER.");
+        state.IsProposer = true;
+        Console.WriteLine($"[Node {nodeId}] No proposer found. This node is now the PROPOSER.");
     }
     else
     {
-        state.IsProvider = false;
-        Console.WriteLine($"[Node {nodeId}] Provider already exists. This node is an acceptor.");
+        state.IsProposer = false;
+        Console.WriteLine($"[Node {nodeId}] Proposer already exists. This node is an acceptor.");
     }
 
     var catchUpService = app.Services.GetRequiredService<PaxosCatchUpService>();

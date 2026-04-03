@@ -51,21 +51,21 @@ namespace Controllers
             });
         }
 
-        [HttpPost("set-provider")]
-        public IActionResult SetProvider([FromBody] SetProviderRequest request)
+        [HttpPost("set-proposer")]
+        public IActionResult SetProposer([FromBody] SetProposerRequest request)
         {
-            if (request == null || request.ProviderNodeId <= 0)
+            if (request == null || request.ProposerNodeId <= 0)
             {
                 return BadRequest(new { message = "Invalid request." });
             }
 
-            _state.IsProvider = false;
+            _state.IsProposer = false;
 
-            Console.WriteLine($"[Node {_nodeId}] Node {request.ProviderNodeId} is now the provider.");
+            Console.WriteLine($"[Node {_nodeId}] Node {request.ProposerNodeId} is now the proposer.");
 
             return Ok(new
             {
-                message = $"Node {request.ProviderNodeId} is now the provider."
+                message = $"Node {request.ProposerNodeId} is now the proposer."
             });
         }
 
@@ -120,7 +120,7 @@ namespace Controllers
                 AcceptedValue = _state.AcceptedValue,
                 IsChosen = _state.IsChosen,
                 LearnedValue = _state.LearnedValue,
-                IsProvider = _state.IsProvider,
+                IsProposer = _state.IsProposer,
                 CurrentPhase = _state.CurrentPhase,
                 JoinedLate = _state.JoinedLate
             };

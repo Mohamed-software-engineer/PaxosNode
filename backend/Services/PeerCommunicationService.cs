@@ -122,24 +122,24 @@ namespace Services
             return results.Where(r => r != null).Select(r => r!).ToList();
         }
 
-        public async Task BroadcastSetProviderAsync(
-            int providerNodeId,
+        public async Task BroadcastSetProposerAsync(
+            int proposerNodeId,
             List<string> peerUrls)
         {
-            var payload = new { providerNodeId };
+            var payload = new { proposerNodeId };
 
             var tasks = peerUrls.Select(async peer =>
             {
                 try
                 {
                     await _httpClient.PostAsJsonAsync(
-                        $"{peer}/api/paxos/set-provider",
+                        $"{peer}/api/paxos/set-proposer",
                         payload
                     );
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"SetProvider broadcast failed for {peer}: {ex.Message}");
+                    Console.WriteLine($"SetProposer broadcast failed for {peer}: {ex.Message}");
                 }
             });
 

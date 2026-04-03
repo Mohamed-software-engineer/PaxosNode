@@ -8,7 +8,7 @@ namespace Models
         public string? AcceptedValue { get; set; }
         public bool IsChosen { get; set; }
         public string? LearnedValue { get; set; }
-        public bool IsProvider { get; set; }
+        public bool IsProposer { get; set; }
         public string CurrentPhase { get; set; } = "Idle";
         public bool JoinedLate { get; set; } = false;
     }

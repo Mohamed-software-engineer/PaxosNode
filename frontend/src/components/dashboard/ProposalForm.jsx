@@ -11,8 +11,8 @@ function ProposalForm({
   onSubmit,
   loading,
 }) {
-  const providerNode = useMemo(
-    () => nodes.find((n) => nodeStates[n.id]?.isProvider),
+  const proposerNode = useMemo(
+    () => nodes.find((n) => nodeStates[n.id]?.isProposer),
     [nodes, nodeStates]
   );
 
@@ -45,7 +45,7 @@ function ProposalForm({
         >
           {nodes.map((node) => (
             <option key={node.id} value={node.id}>
-              {node.name}{nodeStates[node.id]?.isProvider ? " (Provider)" : ""}
+              {node.name}{nodeStates[node.id]?.isProposer ? " (Proposer)" : ""}
             </option>
           ))}
         </select>

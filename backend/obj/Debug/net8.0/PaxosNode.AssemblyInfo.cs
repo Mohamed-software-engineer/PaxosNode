@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PaxosNode")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+57402cf5ea86844e6512744ffc475448b27e4ca7")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cfb3dc22233affe538675ab781dcfb373ea7ec2e")]
 [assembly: System.Reflection.AssemblyProductAttribute("PaxosNode")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PaxosNode")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -4,11 +4,11 @@ import { formatValue } from "../../utils/formatters";
 
 function NodeCard({ node, state, onRefresh }) {
   const isChosen = state?.isChosen;
-  const isProvider = state?.isProvider;
+  const isProposer = state?.isProposer;
   const joinedLate = state?.joinedLate;
   const healthy = !!state?.healthy;
 
-  const role = isProvider ? "Provider" : joinedLate ? "Learner" : isChosen ? "Acceptor" : "Acceptor";
+  const role = isProposer ? "Proposer" : joinedLate ? "Learner" : isChosen ? "Acceptor" : "Acceptor";
 
   return (
     <motion.div
@@ -19,12 +19,12 @@ function NodeCard({ node, state, onRefresh }) {
         background: "white",
         borderRadius: "16px",
         padding: "20px",
-        boxShadow: isProvider
+        boxShadow: isProposer
           ? "0 0 0 2px rgba(59,130,246,0.3), 0 6px 20px rgba(59,130,246,0.2)"
           : isChosen
           ? "0 0 0 2px rgba(34,197,94,0.25), 0 6px 20px rgba(34,197,94,0.15)"
           : "0 2px 8px rgba(0,0,0,0.08)",
-        border: isProvider
+        border: isProposer
           ? "1px solid #60a5fa"
           : isChosen
           ? "1px solid #86efac"
@@ -38,7 +38,7 @@ function NodeCard({ node, state, onRefresh }) {
         </div>
 
         <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-          {isProvider && (
+          {isProposer && (
             <span
               style={{
                 display: "inline-block",
@@ -50,7 +50,7 @@ function NodeCard({ node, state, onRefresh }) {
                 color: "#1e40af",
               }}
             >
-              Provider
+              Proposer
             </span>
           )}
           <motion.div

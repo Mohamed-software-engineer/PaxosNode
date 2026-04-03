@@ -91,16 +91,16 @@ function DashboardPage() {
     [nodeStates]
   );
 
-  const providerNode = useMemo(
-    () => Object.entries(nodeStates).find(([, x]) => x?.isProvider),
+  const proposerNode = useMemo(
+    () => Object.entries(nodeStates).find(([, x]) => x?.isProposer),
     [nodeStates]
   );
 
   const roleCounts = useMemo(() => {
-    const counts = { provider: 0, learner: 0, acceptor: 0 };
+    const counts = { proposer: 0, learner: 0, acceptor: 0 };
     Object.values(nodeStates).forEach((x) => {
       if (!x?.healthy) return;
-      if (x?.isProvider) counts.provider++;
+      if (x?.isProposer) counts.proposer++;
       else if (x?.joinedLate) counts.learner++;
       else counts.acceptor++;
     });
@@ -129,7 +129,7 @@ function DashboardPage() {
       >
         <SummaryCard title="Total Nodes" value={NODES.length} subtitle="Configured frontend nodes" />
         <SummaryCard title="Healthy Nodes" value={healthyCount} subtitle="From /health endpoint" />
-        <SummaryCard title="Provider" value={roleCounts.provider} subtitle="Nodes acting as provider" />
+        <SummaryCard title="Proposer" value={roleCounts.proposer} subtitle="Nodes acting as proposer" />
         <SummaryCard title="Learners" value={roleCounts.learner} subtitle="Nodes that learned consensus" />
         <SummaryCard title="Acceptors" value={roleCounts.acceptor} subtitle="Nodes awaiting proposals" />
       </div>

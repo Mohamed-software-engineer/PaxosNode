@@ -129,10 +129,10 @@ namespace Services
             return $"Success: value '{chosenValue}' chosen with proposal number {proposalNumber}";
         }
 
-        public async Task BroadcastProviderAsync(int providerNodeId)
+        public async Task BroadcastProposerAsync(int proposerNodeId)
         {
-            await _peerCommunicationService.BroadcastSetProviderAsync(
-                providerNodeId,
+            await _peerCommunicationService.BroadcastSetProposerAsync(
+                proposerNodeId,
                 _peerUrls
             );
         }
